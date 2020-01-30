@@ -15,7 +15,7 @@ public abstract class AbstractMetricSender<M extends Metric<M>> implements Metri
   @Override
   public void emit(@Nonnull final Metric<M> metric, final double value) {
     final double sampleRate = metric.getSampleRate();
-    if (sampleRate < 1.0 && Math.random() < sampleRate) {
+    if (sampleRate >= 1.0 || sampleRate < 1.0 && Math.random() < sampleRate) {
       final String line = metricBuilder.build(metric.getName(), metric.getKind(), metric.getSampleRate(), value, metric.getTags());
       send(line);
     }

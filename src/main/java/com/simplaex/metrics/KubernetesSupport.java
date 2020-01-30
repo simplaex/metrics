@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -120,9 +121,13 @@ public class KubernetesSupport {
         ((HttpsURLConnection) conn).setSSLSocketFactory(sc.getSocketFactory());
       }
       conn.addRequestProperty("Authorization", "Bearer " + token);
-      final InputStream s = conn.getInputStream();
-      final String r = new Scanner(s).useDelimiter("\\A").next();
-      final Matcher m = Pattern.compile("\"hostIP\"[^,]+\"([^\"]+)\"").matcher(r);
+      final InputStream in = conn.getInputStream();
+      final String apiResponse = new Scanner(in).useDelimiter("\\A").next();
+      final String regex = Optional
+        .ofNullable(System.getenv("KUBERNETES_HOSTIP_REGEX"))
+        .orElse("\"hostIP\"[^,\"]+\"([^\"]+)\"");
+      final Matcher m = Pattern.compile(regex).matcher(apiResponse);
+      log.info("Response from Kubernetes API: {}", apiResponse);
       if (!m.find()) {
         return "";
       }

@@ -21,10 +21,14 @@ public interface Metric<M extends Metric> {
   }
 
   @Nonnull
-  default M withTag(@Nonnull final String key, @Nullable final Object value) {
-    @SuppressWarnings("unchecked") final M metric = (M) new Metric<M>() {
+  default Metric<M> withTag(@Nonnull final String key, @Nullable final Object value) {
+    return new Metric<M>() {
 
       private final List<Tag> tags = new ArrayList<>(5);
+
+      {
+        tags.add(tag(key, value));
+      }
 
       @Nonnull
       @Override
@@ -46,10 +50,9 @@ public interface Metric<M extends Metric> {
 
       @Override
       @Nonnull
-      public M withTag(@Nonnull final String tagName, @Nullable final Object value) {
-        tags.add(tag(tagName, value));
-        @SuppressWarnings("unchecked") final M thiz = (M) this;
-        return thiz;
+      public Metric<M> withTag(@Nonnull final String tagName, @Nullable final Object value1) {
+        tags.add(tag(tagName, value1));
+        return this;
       }
 
       @Override
@@ -58,7 +61,6 @@ public interface Metric<M extends Metric> {
         return tags;
       }
     };
-    return metric;
   }
 
   @Value
