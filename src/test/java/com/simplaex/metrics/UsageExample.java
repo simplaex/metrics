@@ -7,7 +7,8 @@ public class UsageExample {
 
   @RequiredArgsConstructor
   public enum AppMetrics implements Metric<AppMetrics> {
-    SOME_METRIC("com.simplaex.request", Kind.COUNTER);
+    SOME_METRIC("com.simplaex.request", Kind.COUNTER, 0.1),
+    SOME_OTHER_METRIC("com.simplaex.sessions", Kind.GAUGE);
 
     AppMetrics(final String name, final Kind kind) {
       this(name, kind, 1.0);
