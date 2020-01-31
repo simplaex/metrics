@@ -9,7 +9,7 @@ public class UsageExample {
   public enum AppMetrics implements Metric<AppMetrics> {
     SOME_METRIC("com.simplaex.request", Kind.COUNTER);
 
-    private AppMetrics(final String name, final Kind kind) {
+    AppMetrics(final String name, final Kind kind) {
       this(name, kind, 1.0);
     }
 
