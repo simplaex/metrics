@@ -87,7 +87,20 @@ public class KubernetesSupport {
    * Get the name of this pod (which is its hostname).
    */
   public static String getHostname() {
-    return System.getenv("HOSTNAME");
+    final String hostname = System.getenv("HOSTNAME");
+    if (hostname != null && !hostname.isEmpty()) {
+      log.info("Detected hostname via HOSTNAME environment variable ({})", hostname);
+      return hostname;
+    }
+    try {
+      final Process hostnamePs = Runtime.getRuntime().exec("hostname");
+      hostnamePs.waitFor();
+      final String hostnameFromPs = new java.util.Scanner(hostnamePs.getInputStream()).useDelimiter("\\A").next();
+      log.info("Determined hostname via `hostname` command ({})", hostname);
+      return hostnameFromPs;
+    } catch (final Exception exc) {
+      throw new RuntimeException(exc);
+    }
   }
 
   /**
@@ -102,6 +115,7 @@ public class KubernetesSupport {
       final String token = getKubernetesToken();
       final String uri = String.format(
         "https://%s:%s/api/v1/namespaces/%s/pods/%s", kubeHost, kubePort, namespace, hostname);
+      log.info("Querying pod details from uri={} using token={}", uri, token);
       final URLConnection conn = new URL(uri).openConnection();
       if (conn instanceof HttpsURLConnection) {
         final SSLContext sc = SSLContext.getInstance("SSL");
@@ -127,8 +141,9 @@ public class KubernetesSupport {
         .ofNullable(System.getenv("KUBERNETES_HOSTIP_REGEX"))
         .orElse("\"hostIP\"[^,\"]+\"([^\"]+)\"");
       final Matcher m = Pattern.compile(regex).matcher(apiResponse);
-      log.info("Response from Kubernetes API: {}", apiResponse);
+      log.debug("Response from Kubernetes API: {}", apiResponse);
       if (!m.find()) {
+        log.error("Could not find regex={} (can be set via KUBERNETES_HOSTIP_REGEX) in API response", regex);
         return "";
       }
       return m.group(1);
