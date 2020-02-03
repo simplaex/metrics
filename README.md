@@ -91,3 +91,25 @@ You can now inject:
 ```
 private final MetricsSender<MyApplicationMetrics> metricsSender;
 ```
+
+## Example usage in Scala
+
+```
+package your.sample.project
+
+import com.simplaex.metrics.Metric
+import com.simplaex.metrics.Metric.Kind
+
+import scala.beans.BeanProperty
+
+sealed abstract class ApplicationMetrics(
+  @BeanProperty val name: String,
+  @BeanProperty val kind: Metric.Kind,
+  sampleRate: Double = 1.0
+) extends Metric[ApplicationMetrics] {
+  
+  object JobStarted extends ApplicationMetrics("fountain.started", Kind.COUNTER)
+
+  object JobFinished extends ApplicationMetrics("fountain.finished", Kind.COUNTER)
+}
+```
