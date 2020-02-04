@@ -26,6 +26,29 @@ import java.util.regex.Pattern;
  * Utility to retrieve the host ip of the node the pod is running on from the kubernetes API.
  * <p>
  * See {@link #getHostIp()}.
+ * <p>
+ * The following environment variables affect the behavior of this utility:
+ * <dl>
+ *   <dt><code>KUBERNETES_SERVICE_HOST</code></dt>
+ *   <dd>Defaults to <code>kubernetes.default.svc</code></dd>
+ *
+ *   <dt><code>KUBERNETES_SERVICEACCOUNT_SECRETS_PATH</code></dt>
+ *   <dd>Defaults to <code>/var/run/secrets/kubernetes.io/serviceaccount</code></dd>
+ *
+ *   <dt><code>KUBERNETES_SERVICEACCOUNT_TOKEN</code></dt>
+ *   <dd>Defaults to the value read from <code>KUBERNETES_SERVICE_ACCOUNT_SECRETS_PATH + "/token"</code></dd>
+ *
+ *   <dt><code>KUBERNETES_PORT_443_TCP_PORT</code></dt>
+ *   <dd>Defaults to 443</dd>
+ *
+ *    <dt><code>HOSTNAME</code></dt>
+ *    <dd>The name of the pod/host. If this environment variable is not set it will attempt to call
+ *    the <code>hostname</code> cli tool.</dd>
+ *
+ *    <dt><code>KUBERNETES_HOSTIP_REGEX</code></dt>
+ *    <dd>The regular expression which extracts the hostIP form the reponse of the API server.
+ *    Defaults to <code>"hostIP"[^,"]+"([^"]+)"</code></dd>
+ * </dl>
  *
  * @author Julian Fleischer
  */
@@ -34,9 +57,13 @@ import java.util.regex.Pattern;
 @Log4j2
 public class KubernetesSupport {
 
-  private static String KUBERNETES_DEFAULT_APISERVER = "kubernetes.default.svc";
+  private static String KUBERNETES_SERVICE_HOST = Optional
+    .ofNullable(System.getenv("KUBERNETES_SERVICE_HOST"))
+    .orElse("kubernetes.default.svc");
   private static int KUBERNETES_DEFAULT_PORT = 443;
-  private static String KUBERNETES_SERVICEACCOUNT = "/var/run/secrets/kubernetes.io/serviceaccount";
+  private static String KUBERNETES_SERVICEACCOUNT = Optional
+    .ofNullable(System.getenv("KUBERNETES_SERVICEACCOUNT_SECRETS_PATH"))
+    .orElse("/var/run/secrets/kubernetes.io/serviceaccount");
 
   /**
    * Get the namespace of the pod from the kubernetes serviceaccount secret.
@@ -55,6 +82,10 @@ public class KubernetesSupport {
    */
   @Nonnull
   public static String getKubernetesToken() {
+    final String token = System.getenv("KUBERNETES_SERVICEACCOUNT_TOKEN");
+    if (token != null) {
+      return token;
+    }
     try {
       final byte[] bytes = Files.readAllBytes(Paths.get(KUBERNETES_SERVICEACCOUNT, "token"));
       return new String(bytes, StandardCharsets.UTF_8);
@@ -63,19 +94,7 @@ public class KubernetesSupport {
     }
   }
 
-  /**
-   * Get the hostname of the kuberentes api server.
-   */
-  @Nonnull
-  public static String getKubernetesHost() {
-    final String host = System.getenv("KUBERNETES_SERVICE_HOST");
-    if (host == null) {
-      return KUBERNETES_DEFAULT_APISERVER;
-    }
-    return host;
-  }
-
-  public static int getKubernetesPort() {
+  public static int getKubernetesServicePort() {
     try {
       return Integer.parseInt(System.getenv("KUBERNETES_PORT_443_TCP_PORT"));
     } catch (final Exception exc) {
@@ -108,8 +127,8 @@ public class KubernetesSupport {
    */
   public static String getHostIp() {
     try {
-      final String kubeHost = getKubernetesHost();
-      final int kubePort = getKubernetesPort();
+      final String kubeHost = KUBERNETES_SERVICE_HOST;
+      final int kubePort = getKubernetesServicePort();
       final String namespace = getKubernetesNamespace();
       final String hostname = getHostname();
       final String token = getKubernetesToken();
