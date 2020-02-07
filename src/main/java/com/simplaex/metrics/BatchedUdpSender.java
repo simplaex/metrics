@@ -64,7 +64,7 @@ public class BatchedUdpSender {
     final int batchThreshold;
   }
 
-  public static Options DEFAULT_OPTIONS = new Options(Duration.ofMillis(100), 4000);
+  public static Options DEFAULT_OPTIONS = new Options(Duration.ofMillis(100), 0);
 
   @Nonnull
   public static Options.OptionsBuilder options() {
