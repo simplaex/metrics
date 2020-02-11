@@ -12,7 +12,7 @@ metric types are `count` and `gauge` values.
 <dependency>
   <groupId>com.simplaex</groupId>
   <artifactId>metrics</artifactId>
-  <version>1.1</version>
+  <version>1.1.2.2</version>
 </dependency>
 ```
 
@@ -106,10 +106,10 @@ sealed abstract class ApplicationMetrics(
   @BeanProperty val name: String,
   @BeanProperty val kind: Metric.Kind,
   sampleRate: Double = 1.0
-) extends Metric[ApplicationMetrics] {
-  
-  object JobStarted extends ApplicationMetrics("fountain.started", Kind.COUNTER)
+) extends Metric[ApplicationMetrics]
 
+object ApplicationMetrics {
+  object JobStarted extends ApplicationMetrics("fountain.started", Kind.COUNTER)
   object JobFinished extends ApplicationMetrics("fountain.finished", Kind.COUNTER)
 }
 ```
