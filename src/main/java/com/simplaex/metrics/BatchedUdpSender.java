@@ -89,7 +89,11 @@ public class BatchedUdpSender {
   ) {
     try {
       this.buffer = ByteBuffer.allocateDirect(MAXIMUM_UDP_PAYLOAD_SIZE);
-      this.loop = Executors.newScheduledThreadPool(1);
+      this.loop = Executors.newScheduledThreadPool(1, r -> {
+        Thread t = Executors.defaultThreadFactory().newThread(r);
+        t.setDaemon(true);
+        return t;
+      });
       this.selector = Selector.open();
       this.channel = openChannel(host, port, selector);
       final Options opts = Optional.ofNullable(options).orElse(DEFAULT_OPTIONS);
