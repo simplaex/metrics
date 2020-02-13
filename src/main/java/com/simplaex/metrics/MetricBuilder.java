@@ -12,4 +12,9 @@ public interface MetricBuilder {
     double value,
     @Nonnull Collection<Metric.Tag> tags
   );
+
+  @Nonnull
+  String build(
+    @Nonnull final Event event
+  );
 }

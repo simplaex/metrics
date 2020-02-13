@@ -25,10 +25,13 @@ public class UsageExample {
 
   }
 
-  public static void main(final String... args) {
+  public static void main(final String... args) throws InterruptedException {
     final MetricsSender<AppMetrics> metricsSender = new StatsdMetricSender<>();
-
-    metricsSender.emit(AppMetrics.SOME_METRIC.withTag("path", "/api/v1").withTag("method", "GET"));
+    for (int i = 0; i < 100; i += 1) {
+      metricsSender.emit(AppMetrics.SOME_METRIC.withTag("path", "/api/v1").withTag("method", "GET"));
+      metricsSender.emit(Event.info("some info", "some message"));
+    }
+    Thread.sleep(100);
   }
 
 }

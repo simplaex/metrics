@@ -20,4 +20,9 @@ public abstract class AbstractMetricSender<M extends Metric<M>> implements Metri
       send(line);
     }
   }
+
+  @Override
+  public void emit(@Nonnull final Event event) {
+    send(metricBuilder.build(event));
+  }
 }

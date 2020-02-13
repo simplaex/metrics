@@ -9,4 +9,6 @@ public interface MetricsSender<M extends Metric<M>> {
   default void emit(@Nonnull final Metric<M> metric) {
     emit(metric, 1);
   }
+
+  void emit(@Nonnull final Event event);
 }

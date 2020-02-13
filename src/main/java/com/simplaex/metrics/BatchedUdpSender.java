@@ -91,6 +91,7 @@ public class BatchedUdpSender {
       this.buffer = ByteBuffer.allocateDirect(MAXIMUM_UDP_PAYLOAD_SIZE);
       this.loop = Executors.newScheduledThreadPool(1, runnable -> {
         final Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+        thread.setName(this.getClass().getName());
         thread.setDaemon(true);
         return thread;
       });
