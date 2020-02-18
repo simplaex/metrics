@@ -123,9 +123,28 @@ public class KubernetesSupport {
   }
 
   /**
+   * Gets the instance IP if you're running in EKS/AWS.
+   * <p>
+   * See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
+   */
+  public static String getInstanceIp() throws Exception {
+    final String url = Optional.ofNullable(System.getenv("INSTANCE_METADATA_LOCAL_IPV4_URL"))
+      .orElse("http://169.254.169.254/latest/meta-data/local-ipv4");
+    return new Scanner(new URL(url).openConnection().getInputStream()).next("\\A");
+  }
+
+  /**
    * Get the host ip of the node this pod is running on form the kubernetes api server.
+   * <p>
+   * For this to work the serviceaccount of the pod needs to be able to get it's own
+   * resource from the API server.
    */
   public static String getHostIp() {
+    try {
+      return getInstanceIp();
+    } catch (final Exception ignore) {
+      // ignore and try to get directly from kubernetes instead
+    }
     try {
       final String kubeHost = KUBERNETES_SERVICE_HOST;
       final int kubePort = getKubernetesServicePort();
