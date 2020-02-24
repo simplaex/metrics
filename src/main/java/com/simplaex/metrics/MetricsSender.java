@@ -11,4 +11,24 @@ public interface MetricsSender<M extends Metric<M>> {
   }
 
   void emit(@Nonnull final Event event);
+
+  static <M extends Metric<M>> MetricsSender<M> udpSender() {
+    return new StatsdMetricSender<>();
+  }
+
+  static <M extends Metric<M>> MetricsSender<M> udpSender(final @Nonnull String host) {
+    return new StatsdMetricSender<>(host, 8125);
+  }
+
+  static <M extends Metric<M>> MetricsSender<M> udpSender(final @Nonnull String host, final @Nonnull int port) {
+    return new StatsdMetricSender<>(host, port);
+  }
+
+  static <M extends Metric<M>> MetricsSender<M> noMetrics() {
+    return new NoMetrics<>();
+  }
+
+  static <M extends Metric<M>> InMemoryMetrics<M> inMemoryMetrics() {
+    return new InMemoryMetrics<>();
+  }
 }
