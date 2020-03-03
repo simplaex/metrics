@@ -12,7 +12,7 @@ metric types are `count` and `gauge` values.
 <dependency>
   <groupId>com.simplaex</groupId>
   <artifactId>metrics</artifactId>
-  <version>1.2.1</version>
+  <version>1.4.0</version>
 </dependency>
 ```
 
