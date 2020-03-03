@@ -27,6 +27,9 @@ public class DogstatsdMetricBuilder implements MetricBuilder {
       case COUNTER:
         b.append('c');
         break;
+      case TIMING:
+        b.append("ms");
+        break;
     }
     if (sampleRate < 1.0 && sampleRate > 0) {
       b.append("|@");

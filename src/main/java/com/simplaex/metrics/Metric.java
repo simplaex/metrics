@@ -71,7 +71,8 @@ public interface Metric<M extends Metric> {
 
   enum Kind {
     GAUGE,
-    COUNTER
+    COUNTER,
+    TIMING
   }
 
   static Tag tag(@Nonnull final String tagName, @Nullable final Object value) {

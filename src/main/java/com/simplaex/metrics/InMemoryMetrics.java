@@ -22,14 +22,26 @@ public class InMemoryMetrics<M extends Metric<M>> implements MetricsSender<M> {
     return Collections.unmodifiableList(events);
   }
 
+  private String metricName(final Metric<?> metric) {
+    final StringBuilder b = new StringBuilder(metric.getName());
+    metric.getTags().forEach(tag -> {
+      b.append(',');
+      b.append(tag.getName());
+      b.append('=');
+      b.append(tag.getValue());
+    });
+    return b.toString();
+  }
+
   @Override
   public void emit(@Nonnull final Metric<M> metric, final double value) {
     switch (metric.getKind()) {
       case GAUGE:
-        values.put(metric.getName(), BigDecimal.valueOf(value));
+      case TIMING:
+        values.put(metricName(metric), BigDecimal.valueOf(value));
         break;
       case COUNTER:
-        values.compute(metric.getName(), (k, v) -> (v == null ? BigDecimal.ZERO : v).add(BigDecimal.valueOf(value)));
+        values.compute(metricName(metric), (k, v) -> (v == null ? BigDecimal.ZERO : v).add(BigDecimal.valueOf(value)));
         break;
     }
   }
