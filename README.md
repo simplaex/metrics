@@ -1,8 +1,9 @@
 # dogstatsd metrics
 
-This library implements sending statsd metrics with
-dogstatsd like tags. Currently the only two supported
-metric types are `count` and `gauge` values.
+This library implements sending
+[statsd metrics](https://github.com/statsd/statsd/blob/master/docs/metric_types.md)
+with dogstatsd like tags. Currently it supports sending
+`count` and `gauge` values as well as `timings`.
 
 ## Maven dependency
 
